@@ -1,0 +1,86 @@
+code,name,description
+100,Continue,La requête est en cours de traitement.
+101,Switching Protocols,Le serveur accepte le changement de protocole spécifié par l'entête Upgrade[6].
+102,Processing,Traitement en cours (évite que le client dépasse le temps d’attente limite).
+103,Early Hints,"(Expérimental) Dans l'attente de la réponse définitive, le serveur renvoie des liens que le client peut commencer à télécharger."
+200,OK,Requête traitée avec succès. Le contenu de la réponse dépend de la méthode HTTP de la requête.
+201,Created,Requête traitée avec succès et création d’une ressource.
+202,Accepted,Requête acceptée sans garantie que le traitement demandé réussisse.
+203,Non-Authoritative Information,"Requête traitée avec succès, mais le contenu renvoyé a été modifié par un proxy."
+204,No Content,Requête traitée avec succès sans contenu renvoyé.
+205,Reset Content,"Requête traitée avec succès, la page courante peut être réinitialisée."
+206,Partial Content,Requête d'un contenu partiel traité avec succès.
+207,Multi-Status,Réponse multiple.
+208,Already Reported,Le document a été envoyé précédemment dans cette collection.
+210,Content Different,La copie de la ressource côté client diffère de celle du serveur (contenu ou propriétés).
+226,IM Used,Requête traitée avec succès et la réponse est encodée sous forme de delta avec d'autres réponses.
+300,Multiple Choices,L'URI demandée se rapporte à plusieurs ressources.
+301,Moved Permanently,Document déplacé de façon permanente.
+302,Found,Document déplacé de façon temporaire.
+303,See Other,La réponse se trouve à un autre URI et doit être récupérée avec une méthode GET.
+304,Not Modified,Document non modifié depuis la dernière requête.
+305,Use Proxy (depuis HTTP/1.1),La requête doit être ré-adressée au proxy.
+306,(inutilisé),"La RFC 2616[11] indique que ce code inutilisé est réservé, car il était utilisé dans une ancienne versionde la spécification. Il signifiait « Les requêtes suivantes doivent utiliser le proxy spécifié »[12]."
+307,Temporary Redirect,La requête doit être redirigée temporairement vers l'URI spécifiée sans changement de méthode[13].
+308,Permanent Redirect,La requête doit être redirigée définitivement vers l'URI spécifiée sans changement de méthode[14].
+310,Too many Redirects,"La requête doit être redirigée de trop nombreuses fois, ou est victime d'une boucle de redirection."
+400,Bad Request,La syntaxe de la requête est erronée.
+401,Unauthorized,Une authentification est nécessaire pour accéder à la ressource.
+402,Payment Required,Paiement requis pour accéder à la ressource.
+403,Forbidden,"Le serveur a compris la requête, mais refuse de l'exécuter. Contrairement à l'erreur 401, s'authentifier ne fera aucune différence[Note 1]."
+404,Not Found,Ressource non trouvée.
+405,Method Not Allowed,Méthode de requête non autorisée.
+406,Not Acceptable,La ressource demandée n'est pas disponible dans un format qui respecterait les en-têtes « Accept » de la requête.
+407,Proxy Authentication Required,Accès à la ressource autorisé par identification avec le proxy.
+408,Request Time-out,"Temps d'attente d'une requête du client, écoulé côté serveur. D'après les spécifications HTTP : « Le client n'a pas produit de requêtedans le délai que le serveur était prêt à attendre. Le client PEUT répéter la demande sans modifications à tout moment ultérieur »[15]."
+409,Conflict,La requête ne peut être traitée à la suite d'un conflit avec l'état actuel du serveur.
+410,Gone,La ressource n'est plus disponible et aucune adresse de redirection n’est connue.
+411,Length Required,La longueur de la requête n’a pas été précisée.
+412,Precondition Failed,Préconditions envoyées par la requête non vérifiées.
+413,Request Entity Too Large,Traitement abandonné dû à une requête trop importante.
+414,Request-URI Too Long,URI trop longue.
+415,Unsupported Media Type,Format de requête non supporté pour une méthode et une ressource données.
+416,Requested range unsatisfiable,Champs d'en-tête de requête « range » incorrect.
+417,Expectation failed,Comportement attendu et défini dans l’en-tête de la requête insatisfaisante.
+418,I'm a teapot,"« Je suis une théière » : Ce code est défini dans la RFC 2324[17] datée du 1er avril 1998, Hyper Text Coffee Pot Control Protocol."
+419,Page expired,Ressource expirée
+421,Bad mapping / Misdirected Request,"La requête a été envoyée à un serveur qui n'est pas capable de produire une réponse (par exemple, car une connexion a été réutilisée)."
+422,Unprocessable entity,L'entité fournie avec la requête est incompréhensible ou incomplète.
+423,Locked,L'opération ne peut avoir lieu car la ressource est verrouillée.
+424,Failed Dependency,La modification de la propriété n’a pas pu être effectuée en raison de l’échec d’une autre modification de propriété.
+425,Too Early,Le serveur ne peut traiter la demande car elle risque d'être rejouée.
+426,Upgrade Required,"Le client devrait changer de protocole, par exemple au profit de TLS/1.0."
+427,Invalid digital signature,La signature numérique du document est non-valide.
+428,Precondition Required,La requête doit être conditionnelle.
+429,Too Many Requests,Le client a émis trop de requêtes dans un délai donné.
+431,Request Header Fields Too Large,Les entêtes HTTP émises dépassent la taille maximale admise par le serveur.
+449,Retry With,La requête devrait être renvoyée après avoir effectué une action.
+450,Blocked by Windows Parental Controls,Cette erreur est produite lorsque les outils de contrôle parental de Microsoft Windows sont activés et bloquent l'accès à la page.
+451,Unavailable For Legal Reasons,La ressource demandée est inaccessible pour des raisons d'ordre légal.
+456,Unrecoverable Error,Erreur irrécupérable.
+444,No Response,Indique que le serveur n'a retourné aucune information vers le client et a fermé la connexion.
+495,SSL Certificate Error,"Une extension de l'erreur 400 Bad Request, utilisée lorsque le client a fourni un certificat invalide."
+496,SSL Certificate Required,"Une extension de l'erreur 400 Bad Request, utilisée lorsqu'un certificat client requis n'est pas fourni."
+497,HTTP Request Sent to HTTPS Port,"Une extension de l'erreur 400 Bad Request, utilisée lorsque le client envoie une requête HTTP vers le port 443 normalement destinéaux requêtes HTTPS."
+498,Token expired/invalid,Le jeton a expiré ou est invalide.
+499,Client Closed Request,Le client a fermé la connexion avant de recevoir la réponse. Cette erreur se produit quand le traitement est trop long côté serveur[22].
+500,Internal Server Error,Erreur interne du serveur.
+501,Not Implemented,Fonctionnalité (par exemple méthode HTTP) non supportée.
+502,Bad Gateway ou Proxy Error,"En agissant en tant que serveur proxy ou passerelle, le serveur a reçu une réponse invalide du serveur distant."
+503,Service Unavailable,Service temporairement indisponible ou en maintenance.
+504,Gateway Time-out,Temps d'attente écoulé d'une réponse d'un serveur à un serveur intermédiaire.
+505,HTTP Version not supported,Version HTTP non gérée par le serveur.
+506,Variant Also Negotiates,Erreur de négociation. Transparent content negociation.
+507,Insufficient storage,Espace insuffisant pour modifier les propriétés ou construire la collection.
+508,Loop detected,Boucle dans une mise en relation de ressources (RFC 5842[24]).
+509,Bandwidth Limit Exceeded,Utilisé par de nombreux serveurs pour indiquer un dépassement de quota.
+510,Not extended,La requête ne respecte pas la politique d'accès aux ressources HTTP étendues.
+511,Network authentication required,Le client doit s'authentifier pour accéder au réseau. Utilisé par les portails captifs pour rediriger les clients vers la page d'authentification.
+520,Unknown Error,Réponse générique lorsque le serveur d'origine retourne un résultat imprévu.
+521,Web Server Is Down,Le serveur a refusé la connexion depuis Cloudflare.
+522,Connection Timed Out,Cloudflare n'a pas eu de retour avec le serveur d'origine dans les temps.
+523,Origin Is Unreachable,Cloudflare n'a pas réussi à joindre le serveur d'origine. Cela peut se produire en cas d'échec de résolution de nom de serveur DNS.
+524,A Timeout Occurred,Cloudflare a établi une connexion TCP avec le serveur d'origine mais n'a pas reçu de réponse HTTP avant l'expiration du délai de connexion.
+525,SSL Handshake Failed,Cloudflare n'a pas pu négocier un SSL/TLS handshake avec le serveur d'origine.
+526,Invalid SSL Certificate,Cloudflare n'a pas pu valider le certificat SSL présenté par le serveur d'origine.
+527,Railgun Error,La requête a dépassé le délai de connexion ou a échoué après que la connexion WAN a été établie.
