@@ -1,6 +1,12 @@
 module.exports = function middlewareError(error, req, res, next) {
-    if (error.name === "ValidationError") {
-        const errors = error.errors;
+    if (error.name === "SequelizeValidationError") {
+        const errors = error.errors.reduce((acc, item) => {
+            if (!acc[item.path]) {
+                acc[item.path] = [];
+            }
+            acc[item.path].push(item.message);
+            return acc;
+        }, {});
         /**
          * Format:
          * {
@@ -9,7 +15,7 @@ module.exports = function middlewareError(error, req, res, next) {
          */
         res.status(422).json(errors);
     } else {
-        console.error(e);
+        console.error(error);
         res.sendStatus(500);
     }
 }

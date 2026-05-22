@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --inspect=0.0.0.0 --watch index.js",
-    "dev:windows": "nodemon --inspect=0.0.0.0 -L index.js"
+    "dev:windows": "nodemon --inspect=0.0.0.0 -L index.js",
+    "d:s:u": "node migrate.js"
   },
   "peerDependencies": {
     "nodemon": "^3.1.14"

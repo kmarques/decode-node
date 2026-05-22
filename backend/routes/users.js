@@ -65,7 +65,8 @@ router.patch('/:id', async (req, res, next) => {
             where: {
                 id: req.params.id
             },
-            returning: true
+            returning: true,
+            individualHooks: true
         });
         if (nbUpdated) {
             // For MySQL
