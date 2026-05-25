@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(defaultRouter);
+app.use(require('./routes/security'));
 app.use('/users', usersRouter)
 
 app.use(middlewareError);

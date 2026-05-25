@@ -1,12 +1,14 @@
 const { Router } = require('express');
 const User = require('../models/user');
+const checkAuth = require('../middlewares/check-auth');
 
 const router = new Router();
 
 const users = [];
 
 // Collection routes
-router.get('/', async (req, res, next) => {
+router.get('/', checkAuth(), async (req, res, next) => {
+    // console.log(req.user);
     const filteredUsers = await User.findAll({
         where: req.query
     });
@@ -14,7 +16,7 @@ router.get('/', async (req, res, next) => {
     res.status(200).json(filteredUsers);
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', checkAuth(true), async (req, res, next) => {
     try {
         const newUser = await User.create(req.body);
         res.status(201).json(newUser);
