@@ -24,9 +24,22 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=decode
+    
+    mongo:
+      image: mongo
+      ports:
+        - 127.0.0.1:27019:27017
+      volumes:
+        - mongo-data:/data/db
+        - ./SampleCollections:/SampleCollections
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=root
+        - MONGO_INITDB_ROOT_PASSWORD=password
+      working_dir: /SampleCollections
 
 
 volumes:
   db-data: {}
+  mongo-data: {}
         
       
