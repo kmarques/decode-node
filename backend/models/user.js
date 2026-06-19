@@ -1,6 +1,7 @@
 const { Model, DataTypes, Op } = require('sequelize');
 const connection = require('../lib/db');
 const bcrypt = require('bcryptjs');
+const generateAuthorMongoDocument = require('../hooks/mongo/generateAuthorMongoDocument');
 
 class User extends Model {
     static countDecodeUser() {
@@ -15,6 +16,24 @@ class User extends Model {
 
     static nativeCountDecodeUser() {
         return connection.query(`SELECT count(*) from "user" where email ilike '%ecole-decode.fr'`);
+
+    }
+
+    static addHooks(models) {
+        User.addHook('beforeCreate', (user, options) => {
+            user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
+        });
+
+        User.addHook('beforeUpdate', (user, options) => {
+            // if (user.changed('password'))
+            if (options.fields.includes('password'))
+                user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
+        })
+
+
+        User.addHook('afterCreate', (instance) => generateAuthorMongoDocument(instance.id, models));
+        User.addHook('afterUpdate', (instance) => generateAuthorMongoDocument(instance.id, models));
+        User.addHook('afterDestroy', (instance) => generateAuthorMongoDocument(instance.id, models));
 
     }
 }
@@ -47,14 +66,16 @@ User.init({
     underscored: false // true = Change "Users" to "users" and "createdAt" to "created_at",
 });
 
-User.addHook('beforeCreate', (user, options) => {
-    user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
-});
 
-User.addHook('beforeUpdate', (user, options) => {
-    // if (user.changed('password'))
-    if (options.fields.includes('password'))
-        user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
-})
+// decorateMongo(Article, [{
+//     events: ['afterCreate', 'afterUpdate', 'afterDestroy'],
+//     callback: generateAuthorMongoDocument,
+//     id: (instance) => instance.owner.id,
+// }]);
+// decorateMongo(User, [{
+//     events: ['afterCreate', 'afterUpdate', 'afterDestroy'],
+//     callback: generateAuthorMongoDocument,
+//     id: (instance) => instance.id,
+// }]);
 
 module.exports = User;

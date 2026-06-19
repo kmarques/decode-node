@@ -2,6 +2,7 @@ const express = require('express');
 const middlewareError = require('./middlewares/error-handler');
 const defaultRouter = require('./routes/default');
 const usersRouter = require('./routes/users');
+const articlesRouter = require('./routes/articles');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ app.use(express.urlencoded());
 app.use(defaultRouter);
 app.use(require('./routes/security'));
 app.use('/users', usersRouter)
+app.use('/articles', articlesRouter)
 
 app.use(middlewareError);
 

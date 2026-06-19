@@ -1,5 +1,6 @@
 const connection = require('./lib/db');
 require('./models/user');
+require('./models/article');
 
 const method = process.argv[2]?.slice(2) ?? "alter";
 
