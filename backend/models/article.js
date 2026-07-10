@@ -4,9 +4,9 @@ const generateAuthorMongoDocument = require('../hooks/mongo/generateAuthorMongoD
 
 class Article extends Model {
     static addHooks(models) {
-        Article.addHook('afterCreate', (instance) => console.log("createAticle", instance) || generateAuthorMongoDocument(instance.UserId, models));
-        Article.addHook('afterUpdate', (instance) => generateAuthorMongoDocument(instance.UserId, models));
-        Article.addHook('afterDestroy', (instance) => generateAuthorMongoDocument(instance.UserId, models));
+        Article.addHook('afterCreate', (instance) => console.log("createAticle", instance) || generateAuthorMongoDocument(instance.userId, models));
+        Article.addHook('afterUpdate', (instance) => generateAuthorMongoDocument(instance.userId, models));
+        Article.addHook('afterDestroy', (instance) => generateAuthorMongoDocument(instance.userId, models));
     }
 
     static associate(models) {
