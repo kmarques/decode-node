@@ -14,7 +14,8 @@ class Article extends Model {
             foreignKey: 'userId',
             as: 'owner'
         });
-        models.User.hasMany(Article, {
+        models.User.hasMany(models.Article, {
+            foreignKey: 'userId',
             as: 'articles'
         });
     }
