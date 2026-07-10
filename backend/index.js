@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const middlewareError = require('./middlewares/error-handler');
 const defaultRouter = require('./routes/default');
 const usersRouter = require('./routes/users');
@@ -7,6 +8,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 // app.use(middlewareParseBody);
 app.use(express.json());
 app.use(express.urlencoded());
