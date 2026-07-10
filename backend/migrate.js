@@ -1,12 +1,16 @@
-const connection = require('./lib/db');
-require('./models/user');
-require('./models/article');
+const { db } = require('./models');
+
 
 const method = process.argv[2]?.slice(2) ?? "alter";
 
-connection
+db
     .sync({
         [method]: true
     })
     .then(() => console.log("Database synced"))
-    .then(() => connection.close());
+    .then(() => db.close())
+    .then(() => console.log("Connection closed") || process.exit(0))
+    .catch((error) => {
+        console.log("Error syncing database:", error);
+        process.exit(1);
+    });

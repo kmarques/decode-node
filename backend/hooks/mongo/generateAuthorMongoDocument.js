@@ -1,7 +1,6 @@
 const Author = require("../../models/mongo/author");
 
 module.exports = async function generateAuthorMongoDocument(userId, models) {
-    console.log("generateAuthorMongoDocument", userId);
     const user = await models.User.findOne({
         attributes: ["id", ["id", "_id"], "firstname", "lastname"],
         include: [

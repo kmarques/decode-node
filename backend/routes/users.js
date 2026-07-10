@@ -8,7 +8,7 @@ const router = new Router();
 const users = [];
 
 // Collection routes
-router.get('/', checkAuth(), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
     // console.log(req.user);
     const filteredUsers = await User.findAll({
         where: req.query
@@ -17,13 +17,41 @@ router.get('/', checkAuth(), async (req, res, next) => {
     res.status(200).json(filteredUsers);
 });
 
-router.post('/', checkAuth(true), async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     try {
         const newUser = await User.create(req.body);
         res.status(201).json(newUser);
     } catch (e) {
         next(e);
     }
+});
+
+router.get('/subscribe', async (req, res, next) => {
+    subscribers.push(res);
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+    });
+
+    try {
+        const initialAuthors = await Author.find({});
+        res.write(`data: ${JSON.stringify({ statsId: "treza", operationType: 'initial', data: initialAuthors })}\n\n`);
+    } catch (err) {
+        console.error("Error fetching initial authors:", err);
+    }
+
+    const watcher = Author.watch([
+        /** aggregate pipeline **/
+    ], { fullDocument: 'updateLookup' }).on('change', (change) => {
+        console.log(change);
+        notifySubscribers(change);
+    });
+
+    req.on('close', () => {
+        subscribers.splice(subscribers.indexOf(res), 1);
+        watcher.close();
+    });
 });
 
 // Item routes
@@ -99,32 +127,6 @@ function notifySubscribers(data) {
     subscribers.forEach(res => res.write(`data: ${JSON.stringify(data)}\n\n`));
 }
 
-router.get('/subscribe', async (req, res, next) => {
-    subscribers.push(res);
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-    });
 
-    try {
-        const initialAuthors = await Author.find({});
-        res.write(`data: ${JSON.stringify({ operationType: 'initial', data: initialAuthors })}\n\n`);
-    } catch (err) {
-        console.error("Error fetching initial authors:", err);
-    }
-
-    const watcher = Author.watch([
-        /** aggregate pipeline **/
-    ], { fullDocument: 'updateLookup' }).on('change', (change) => {
-        console.log(change);
-        notifySubscribers(change);
-    });
-
-    req.on('close', () => {
-        subscribers.splice(subscribers.indexOf(res), 1);
-        watcher.close();
-    });
-});
 
 module.exports = router;
