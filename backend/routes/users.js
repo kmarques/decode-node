@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { User } = require('../models');
 const checkAuth = require('../middlewares/check-auth');
+const Author = require('../models/mongo/author');
 
 const router = new Router();
 
@@ -90,6 +91,40 @@ router.get('/:id/articles', (req, res, next) => {
     } else {
         res.sendStatus(404);
     }
+});
+
+const subscribers = [];
+
+function notifySubscribers(data) {
+    subscribers.forEach(res => res.write(`data: ${JSON.stringify(data)}\n\n`));
+}
+
+router.get('/subscribe', async (req, res, next) => {
+    subscribers.push(res);
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+    });
+
+    try {
+        const initialAuthors = await Author.find({});
+        res.write(`data: ${JSON.stringify({ operationType: 'initial', data: initialAuthors })}\n\n`);
+    } catch (err) {
+        console.error("Error fetching initial authors:", err);
+    }
+
+    const watcher = Author.watch([
+        /** aggregate pipeline **/
+    ], { fullDocument: 'updateLookup' }).on('change', (change) => {
+        console.log(change);
+        notifySubscribers(change);
+    });
+
+    req.on('close', () => {
+        subscribers.splice(subscribers.indexOf(res), 1);
+        watcher.close();
+    });
 });
 
 module.exports = router;
