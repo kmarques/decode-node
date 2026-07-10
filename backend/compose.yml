@@ -12,10 +12,11 @@ services:
         - NODE_ENV=development
         - PORT=3000
         - DATABASE_URL=postgres://postgres:postgres@db/decode
-        - MONGO_URL=mongodb://root:password@mongo:27017/decode?authSource=admin
+        - MONGO_URL=mongodb://root:password@mongodb:27017/decode?authSource=admin
         - JWT_SECRET=myVeryVeryStrongSecret!
       depends_on:
         - db
+        - mongodb
 
     db:
       image: postgres:17-alpine
@@ -26,10 +27,11 @@ services:
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=decode
     
-    mongo:
+    mongodb:
       image: mongo
       ports:
-        - 127.0.0.1:27019:27017
+        - "27019:27017"
+      command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
       volumes:
         - mongo-data:/data/db
         - ./SampleCollections:/SampleCollections
@@ -37,6 +39,43 @@ services:
         - MONGO_INITDB_ROOT_USERNAME=root
         - MONGO_INITDB_ROOT_PASSWORD=password
       working_dir: /SampleCollections
+      healthcheck:
+        test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+    mongodb-setup:
+      image: mongo:6.0
+      container_name: mongodb-setup
+      depends_on:
+        mongodb:
+          condition: service_healthy
+      command: >
+        mongosh --host mongodb:27017 --eval '
+          let count = 0;
+          while (count < 10) {
+            try {
+              let status = rs.status();
+              console.log("Replica Set already initialized");
+              break;
+            } catch (e) {
+              console.log("Attempting to initiate Replica Set...");
+              try {
+                rs.initiate({
+                  _id: "rs0",
+                  members: [{ _id: 0, host: "localhost:27017" }]
+                });
+                console.log("Replica Set initiated successfully");
+                break;
+              } catch (initErr) {
+                console.log("Initiate failed, retrying in 2s...", initErr.message);
+                sleep(2000);
+                count++;
+              }
+            }
+          }
+        '
 
 
 volumes:
