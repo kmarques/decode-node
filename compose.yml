@@ -1,0 +1,7 @@
+services:
+  backend:
+    image: node:alpine
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: ['node', 'watch-tower.js']
