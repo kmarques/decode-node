@@ -5,3 +5,7 @@ services:
     volumes:
       - ./backend:/app
     command: ['npm', 'run', 'dev']
+    environment:
+      PORT: 3000
+    ports:
+      - 8000:3000
