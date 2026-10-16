@@ -117,8 +117,8 @@ Implémenter la route `GET /api/movies` supportant les critères optionnels et c
 - **Filtrage :** `genre` (insensible à la casse), `minRating` (note minimale), `available` (booléen).
 - **Recherche textuelle :** `search` (recherche partielle sur le titre ou le réalisateur).
 - **Tri :** `sort` (ex: `year` pour croissant, `-year` pour décroissant).
-- **Pagination :** `page` (défaut: 1) et `limit` (défaut: 10).
-  - La réponse doit inclure les métadonnées (`page`, `limit`, `total`, `totalPages`) et le tableau `data`.
+- **Pagination :** `page` (défaut: 1) et `itemsPerPage` (défaut: 10).
+  - La réponse doit inclure les métadonnées (`page`, `itemsPerPage`, `total`, `totalPages`) et le tableau `data`.
 
 #### 3. Validation & Codes d'erreur
 - **Contrôle des identifiants :**
