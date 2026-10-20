@@ -54,7 +54,7 @@ export default {
         }
     },
     delete: async (req, res) => {
-        const [nbDeleted] = await User.destroy({
+        const nbDeleted = await User.destroy({
             where: { id: req.params.id }
         });
 

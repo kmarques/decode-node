@@ -1,11 +1,12 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, Sequelize } from "sequelize";
 import connection from "./connection.js";
 
 class Article extends Model { }
 
 Article.init({
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
     title: {
@@ -19,7 +20,7 @@ Article.init({
     publishedAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: "NOW()"
+        defaultValue: Sequelize.fn("NOW")
     }
 }, {
     sequelize: connection

@@ -53,7 +53,7 @@ export default {
         }
     },
     delete: async (req, res) => {
-        const [nbDeleted] = await Article.destroy({
+        const nbDeleted = await Article.destroy({
             where: { id: req.params.id }
         });
 

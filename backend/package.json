@@ -18,7 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "dev:windows": "nodemon -L server.js"
+    "dev:windows": "nodemon -L server.js",
+    "d:s:u": "node migrator.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

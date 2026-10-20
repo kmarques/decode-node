@@ -5,7 +5,8 @@ class User extends Model { }
 
 User.init({
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
     email: {
@@ -24,6 +25,7 @@ User.init({
         }
     },
     lastname: DataTypes.STRING,
+    firstname: DataTypes.STRING,
     dob: DataTypes.DATEONLY
 }, {
     sequelize: connection
