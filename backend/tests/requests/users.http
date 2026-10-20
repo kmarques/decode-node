@@ -1,0 +1,28 @@
+### Collection get
+GET http://localhost:8000/users
+
+### Collection post => create
+# @name register
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+    "email": "test@test.fr",
+    "password": "test"
+}
+
+###
+@userId={{register.response.body.id}}
+### Item get
+GET http://localhost:8000/users/{{userId}}
+
+### Item patch
+PATCH http://localhost:8000/users/{{userId}}
+Content-Type: application/json
+
+{
+    "password": "password"
+}
+
+### Item delete
+DELETE http://localhost:8000/users/{{userId}}

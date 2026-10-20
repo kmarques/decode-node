@@ -1,4 +1,6 @@
 import express from "express";
+import userRouter from "./routes/users.js";
+import articleRouter from "./routes/articles.js";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
@@ -14,6 +16,9 @@ app.get('/', (request, response, next) => {
     response.setHeader('Content-Type', 'text/html');
     response.send('<h1>Hello HTML</h1>' + JSON.stringify(request.query));
 });
+
+app.use(userRouter);
+app.use(articleRouter);
 
 app.get('/:id', (req, res) => {
     res.send(req.params.id);

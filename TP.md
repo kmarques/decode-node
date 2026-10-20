@@ -139,3 +139,137 @@ Implémenter la route `GET /api/movies` supportant les critères optionnels et c
 - Respect des signatures d'URL et des conventions REST.
 - Typage et validation stricte des paramètres (gestion des `NaN`, types numériques).
 - Utilisation appropriée des codes de statut HTTP (`200`, `404`, `422`).
+
+---
+
+## TP 3 : Relations entre entités & Conception d'une API RESTful
+
+### Contexte
+Votre application de gestion de contenu éditorial continue d'évoluer. Jusqu'à présent, les articles et les utilisateurs étaient gérés de manière totalement indépendante. 
+
+Vous devez à présent concevoir et implémenter les relations entre vos entités, puis définir et exposer les fonctionnalités correspondantes au travers d'une API **strictement conforme aux standards RESTful**.
+
+> ⚠️ **Consigne importante de conception :**  
+> Aucun chemin d'URL ne vous est imposé. **C'est à vous de concevoir l'arborescence des routes, le nommage des endpoints, le choix des verbes HTTP et la hiérarchie des ressources/sous-ressources**, en appliquant avec rigueur les principes de l'architecture REST.
+
+---
+
+### Objectifs pédagogiques
+- **Modélisation relationnelle** :
+  - **1:N (One-to-Many)** : Auteur d'un article (`author_id`).
+  - **N:N (Many-to-Many)** : Tags associés aux articles (avec table de liaison).
+  - **1:N (Sous-ressource dépendante)** : Commentaires rattachés aux articles et aux utilisateurs.
+- **Design d'API RESTful** :
+  - Déterminer la structure des URIs (ressources racine vs sous-ressources imbriquées).
+  - Choisir les verbes HTTP appropriés selon l'opération et son idempotence.
+  - Sélectionner et retourner les codes de statut HTTP exacts selon le scénario (création, suppression, erreurs de validation, conflits, introuvable, non authentifié).
+  - Garantir l'intégrité référentielle et la gestion propre des erreurs.
+
+---
+
+### 🔐 Simulation de l'utilisateur connecté (`X-USER-ID`)
+
+En l'absence d'un système d'authentification complet (tokens JWT, sessions), l'identité de l'utilisateur connecté est simulée via un en-tête HTTP personnalisé :
+- **En-tête attendu :** `X-USER-ID` (qui contiendra l'identifiant de l'utilisateur effectuant la requête).
+- **Règles de prise en compte :**
+  - Pour toute action nécessitant un auteur (création d'un article, ajout d'un commentaire, etc.), **l'auteur ne doit pas être fourni arbitrairement dans le corps de la requête**, mais impérativement déduit de la valeur de l'en-tête `X-USER-ID`.
+  - Si l'en-tête `X-USER-ID` est absent lors d'une opération requérant un utilisateur connecté, la requête doit être immédiatement rejetée avec le code `401 Unauthorized`.
+  - Si l'identifiant passé dans `X-USER-ID` ne correspond à aucun utilisateur existant en base de données, la requête doit également être rejetée (`401 Unauthorized`).
+
+---
+
+### Spécifications fonctionnelles
+
+#### 1. Relation Utilisateur ↔ Article (1:N)
+
+##### Modélisation :
+- Un article doit posséder un auteur unique, identifié par la clé étrangère `author_id` liant la table des articles à celle des utilisateurs.
+- Configurer les associations bidirectionnelles correspondantes sur vos modèles.
+
+##### Fonctionnalités attendues :
+- **Création d'un article avec auteur** :
+  - L'auteur de l'article doit être déduit du header `X-USER-ID`.
+  - Si le header est manquant ou que l'utilisateur n'existe pas en base, renvoyer l'erreur d'authentification appropriée.
+- **Consultation d'un article** :
+  - Permettre de récupérer un article en intégrant les données de son auteur.
+- **Articles d'un auteur** :
+  - Permettre de lister tous les articles rédigés par un utilisateur spécifique.
+  - Gérer le cas où l'utilisateur ciblé n'existe pas.
+
+---
+
+#### 2. Relation Articles ↔ Tags (Many-to-Many)
+
+##### Modélisation :
+- Créer une entité **Tag** (avec au minimum un identifiant et un libellé textuel unique).
+- Créer la table de jointure permettant d'associer plusieurs tags à un même article, et plusieurs articles à un même tag.
+- Configurer l'association Many-to-Many sur vos modèles.
+
+##### Fonctionnalités attendues :
+- **Gestion du catalogue de tags** :
+  - Lister tous les tags existants.
+  - Créer un nouveau tag (deux tags ne peuvent pas avoir le même libellé : prévoir la gestion du doublon avec le code HTTP adapté).
+  - Supprimer un tag.
+- **Liaison entre articles et tags** :
+  - Lister l'ensemble des tags rattachés à un article spécifique.
+  - Associer un ou plusieurs tags existants à un article.
+  - Détacher (dissocier) un tag d'un article, sans supprimer le tag de la base de données.
+  - S'assurer que les entités ciblées existent avant d'effectuer l'association ou la dissociation.
+
+---
+
+#### 3. Système de Commentaires (Ressource dépendante)
+
+##### Modélisation :
+- Créer une entité **Comment** (avec au minimum un identifiant, un contenu textuel, un horodatage et les liaisons vers l'article et vers l'auteur du commentaire).
+- Un commentaire ne peut exister sans article de rattachement.
+
+##### Fonctionnalités attendues :
+- **Consultation des commentaires** :
+  - Récupérer la liste des commentaires liés à un article donné (avec les informations de leurs auteurs respectifs).
+  - Consulter un commentaire précis via son identifiant.
+- **Ajout d'un commentaire** :
+  - Ajouter un commentaire sous un article spécifique.
+  - L'auteur du commentaire doit être déduit du header `X-USER-ID`.
+  - Valider la présence du contenu, l'existence de l'article ciblé et la validité de l'utilisateur connecté.
+- **Mise à jour et suppression** :
+  - Mettre à jour partiellement le contenu d'un commentaire existant.
+  - Supprimer un commentaire.
+
+---
+
+### Exigences & Règles RESTful obligatoires
+
+Votre API sera évaluée sur sa stricte conformité aux conventions REST :
+
+1. **Nommage des endpoints** :
+   - Les URIs doivent employer exclusivement des **noms (substantifs) au pluriel** pour désigner les collections.
+   - **Aucun verbe d'action** dans les URLs (interdiction de chemins comme `/create`, `/delete`, `/getArticles`, `/addTag`, etc.).
+   - Utiliser la hiérarchie parent / enfant (ressource / sous-ressource) pour exprimer une dépendance forte ou une relation directe entre deux entités.
+
+2. **Utilisation sémantique des méthodes HTTP** :
+   - `GET` : Lecture seule, sans altération de l'état du serveur.
+   - `POST` : Création d'une nouvelle ressource ou établissement d'une relation.
+   - `PATCH` : Mise à jour partielle d'une ressource existante.
+   - `DELETE` : Suppression d'une ressource ou dissociation d'une relation.
+
+3. **Codes de statut HTTP normalisés** :
+   - `200 OK` : Succès d'une requête de lecture ou de mise à jour avec retour de contenu.
+   - `201 Created` : Succès d'une création (avec retour de la ressource créée).
+   - `204 No Content` : Succès d'une opération sans corps de réponse (ex: suppression, dissociation).
+   - `400 Bad Request` ou `422 Unprocessable Entity` : Données invalides, champs manquants ou non conformes aux règles de validation.
+   - `401 Unauthorized` : Header de simulation d'authentification (`X-USER-ID`) absent ou utilisateur inconnu.
+   - `404 Not Found` : Ressource ciblée introuvable (y compris lorsqu'une ressource parente dans une URI imbriquée n'existe pas).
+   - `409 Conflict` : Violation d'une contrainte d'unicité (ex: tentative de doublon).
+
+4. **Format des données** :
+   - Corps des requêtes et des réponses formatés en JSON (`Content-Type: application/json`).
+
+---
+
+### Critères d'évaluation
+- [ ] Modélisation correcte des relations (1:N, N:N avec table pivot, sous-ressources).
+- [ ] Conception de l'arborescence des routes 100% conforme aux conventions REST (pluriel, sous-ressources imbriquées, absence de verbes).
+- [ ] Extraction correcte de l'utilisateur connecté via l'en-tête `X-USER-ID` et contrôle d'accès (`401 Unauthorized` si absent/invalide).
+- [ ] Utilisation rigoureuse des verbes HTTP et des codes de statut HTTP correspondants.
+- [ ] Contrôle strict de l'intégrité des données et gestion propre de toutes les erreurs (aucune erreur `500` provoquée par un identifiant inconnu ou une payload invalide).
