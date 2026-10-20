@@ -1,5 +1,13 @@
 # TPs
 
+## 📑 Table des matières
+
+- [TP 1 — Web Scraping des codes HTTP en Node.js](#tp-1--web-scraping-des-codes-http-en-nodejs)
+- [TP 2 : Routage & Paramétrage d'API avec Express.js](#tp-2--routage--paramétrage-dapi-avec-expressjs)
+- [TP 3 : Relations entre entités & Conception d'une API RESTful](#tp-3--relations-entre-entités--conception-dune-api-restful)
+
+---
+
 ## TP 1 — Web Scraping des codes HTTP en Node.js
 
 ### 🎯 Objectif
