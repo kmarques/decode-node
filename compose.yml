@@ -7,6 +7,7 @@ services:
     command: ['npm', 'run', 'dev']
     environment:
       PORT: 3000
+      JWT_SECRET: gfhdxchgjkvhkj
       DATABASE_URL: postgres://user:password@database:5432/db_name
     ports:
       - 8000:3000

@@ -1,4 +1,4 @@
-import User from "../models/db/user.js";
+import { User, Article } from "../models/db/index.js";
 
 export default {
     cget: async (req, res) => {
@@ -18,13 +18,17 @@ export default {
 
         const result = await User.findAll({
             where: filters,
-            ...params
+            ...params,
+            include: [
+                { model: Article, as: "articles" }
+            ]
         });
 
         res.json(result);
     },
     create: async (req, res, next) => {
         try {
+            console.log("User connected", req.user);
             const user = await User.create(req.body);
             res.status(201).json(user);
         } catch (err) {
@@ -43,7 +47,9 @@ export default {
         try {
             const [nbUpdated, [user]] = await User.update(req.body, {
                 where: { id: req.params.id },
-                returning: true
+                returning: true,
+                individualHooks: true,
+                toto: true
             });
 
             if (!nbUpdated) return res.sendStatus(404);

@@ -1,5 +1,18 @@
+### login
+# @name login
+POST http://localhost:8000/login
+Content-Type: application/json
+
+{
+    "email": "test6@test.fr",
+    "password": "test"
+}
+###
+@token={{login.response.body.token}}
+
 ### Collection get
 GET http://localhost:8000/users
+Authorization: Bearer {{token}}
 
 ### Collection post => create
 # @name register
@@ -7,7 +20,7 @@ POST http://localhost:8000/users
 Content-Type: application/json
 
 {
-    "email": "test@test.fr",
+    "email": "test6@test.fr",
     "password": "test"
 }
 
@@ -15,13 +28,16 @@ Content-Type: application/json
 @userId={{register.response.body.id}}
 ### Item get
 GET http://localhost:8000/users/{{userId}}
+Authorization: Bearer {{token}}
 
 ### Item patch
 PATCH http://localhost:8000/users/{{userId}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-    "password": "password"
+    "lastname": "Doe",
+    "firstname": "john"
 }
 
 ### Item delete

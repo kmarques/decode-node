@@ -1,4 +1,4 @@
-import Article from "../models/db/article.js";
+import { Article, User } from "../models/db/index.js";
 
 export default {
     cget: async (req, res) => {
@@ -17,7 +17,10 @@ export default {
 
         const result = await Article.findAll({
             where: filters,
-            ...params
+            ...params,
+            include: [
+                { model: User, as: "author" }
+            ]
         });
 
         res.json(result);

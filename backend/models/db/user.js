@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import connection from "./connection.js";
+import bcrypt from "bcryptjs";
 
 class User extends Model { }
 
@@ -29,6 +30,18 @@ User.init({
     dob: DataTypes.DATEONLY
 }, {
     sequelize: connection
-})
+});
+
+async function hashPassword(user) {
+    user.password = await bcrypt.hash(user.password, await bcrypt.genSalt(10));
+}
+
+User.addHook("beforeCreate", hashPassword);
+User.addHook("beforeUpdate", async (user, options) => {
+    const { fields } = options;
+    if (fields.includes("password")) {
+        await hashPassword(user);
+    }
+});
 
 export default User;

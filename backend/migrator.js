@@ -1,7 +1,4 @@
-import connection from "./models/db/connection.js";
-
-import "./models/db/article.js";
-import "./models/db/user.js";
+import { connection } from "./models/db/index.js";
 
 const method = (process.argv[2] ?? "--alter").slice(2);
 

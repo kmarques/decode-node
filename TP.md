@@ -5,6 +5,7 @@
 - [TP 1 — Web Scraping des codes HTTP en Node.js](#tp-1--web-scraping-des-codes-http-en-nodejs)
 - [TP 2 : Routage & Paramétrage d'API avec Express.js](#tp-2--routage--paramétrage-dapi-avec-expressjs)
 - [TP 3 : Relations entre entités & Conception d'une API RESTful](#tp-3--relations-entre-entités--conception-dune-api-restful)
+- [TP 4 : Outil CLI & Automatisation avec le Pattern Command](#tp-4--outil-cli--automatisation-avec-le-pattern-command)
 
 ---
 
@@ -281,3 +282,109 @@ Votre API sera évaluée sur sa stricte conformité aux conventions REST :
 - [ ] Extraction correcte de l'utilisateur connecté via l'en-tête `X-USER-ID` et contrôle d'accès (`401 Unauthorized` si absent/invalide).
 - [ ] Utilisation rigoureuse des verbes HTTP et des codes de statut HTTP correspondants.
 - [ ] Contrôle strict de l'intégrité des données et gestion propre de toutes les erreurs (aucune erreur `500` provoquée par un identifiant inconnu ou une payload invalide).
+
+---
+
+## TP 4 : Outil CLI & Automatisation avec le Pattern Command
+
+### Contexte
+Au fur et à mesure que l'application s'étoffe, la création manuelle des composants d'une ressource (modèle, contrôleur, routeur) devient répétitive, fastidieuse et source d'erreurs (oublis d'imports, fautes de frappe, boilerplate dupliqué).
+
+Pour industrialiser le développement, vous allez concevoir une **interface en ligne de commande (CLI)** pour votre projet. Cet outil permettra aux développeurs d'automatiser la génération de code cohérent et de faciliter les opérations d'administration telles que la synchronisation de la base de données.
+
+---
+
+### Objectifs pédagogiques
+- Concevoir un outil CLI modulaire et robuste en Node.js.
+- Implémenter le **Design Pattern Command** pour garantir l'extensibilité du système (ajout aisé de nouvelles commandes sans modifier le cœur du CLI).
+- Manipuler le système de fichiers (`fs` / `fs/promises`) pour générer du code à partir de templates.
+- Mettre à jour programmatiquement un fichier existant (`server.js`) pour enregistrer automatiquement de nouvelles routes.
+- Refactoriser un script procédural existant (`migrator.js`) en commande CLI structurée avec gestion avancée des options et drapeaux.
+
+---
+
+### 📦 Bibliothèques autorisées & vérification des dépendances
+
+Pour la construction de votre CLI, vous êtes autorisés à vous appuyer sur des bibliothèques reconnues de l'écosystème Node.js :
+- **`commander`** : gestion du parsing des arguments, options/flags, sous-commandes et génération automatique de l'aide (`--help`).
+- **`inquirer`** *(ou `@inquirer/prompts`)* : pour enrichir l'expérience utilisateur avec des questions interactives dans le terminal si un argument est manquant.
+
+---
+
+### 🏛️ Contrainte architecturale obligatoire : le Design Pattern Command
+
+Le CLI ne doit **pas** être un script monolithique contenant une longue chaîne de conditions `if/else` ou un volumineux `switch`. Vous devez impérativement appliquer le **Design Pattern Command** :
+1. **Découplage** : Le point d'entrée principal de votre CLI (ex: `bin/cli.js` ou `cli.js`) doit uniquement être responsable d'initialiser le parseur, d'enregistrer les commandes et de déléguer leur exécution.
+2. **Encapsulation** : Chaque commande doit être isolée dans son propre fichier/module (ex: dans un répertoire dédié `commands/`), respectant un contrat / une structure homogène (nom de la commande, description, déclaration des options/arguments et logique d'exécution).
+3. **Principe Ouvert/Fermé (Open/Closed)** : L'ajout d'une future commande doit pouvoir se faire par la simple création d'un nouveau fichier de commande, avec un minimum voire aucune modification du point d'entrée.
+
+---
+
+### Spécifications fonctionnelles & Étapes de réalisation
+
+#### Étape 1 : Générateur de CRUD (`make:crud`)
+
+Vous devez implémenter une commande nommée `make:crud` permettant d'automatiser la création d'une nouvelle ressource complète dans le projet.
+
+##### Déroulement & Détection du Modèle :
+1. La commande prend en argument le **nom de l'entité** (ex: `Product`, `Category`, `Tag`). Si le nom n'est pas fourni lors de l'appel, demandez-le de manière interactive via `inquirer`.
+2. **Vérification de l'existence du modèle :**
+   - **Si le modèle existe déjà** dans `models/db/` : la commande s'appuie sur ce modèle pour générer le contrôleur et le routeur associés.
+   - **Si le modèle n'existe pas** :
+     - La commande doit le notifier clairement dans le terminal (ex: *"Le modèle n'existe pas, initialisation de sa création interactive..."*).
+     - Déclencher un questionnaire interactif (`inquirer`) pour configurer le modèle :
+       - **Attributs du modèle** : saisir interactivement une liste de champs (saisie en boucle jusqu'à validation) avec pour chaque champ :
+         - Son nom.
+         - Son type de données Sequelize (ex: `STRING`, `INTEGER`, `BOOLEAN`, `TEXT`, `DATE`, `UUID`...).
+         - Ses contraintes de base (ex: `allowNull` : oui/non, valeur par défaut éventuelle).
+       - **Relations / Associations** : proposer d'associer le nouveau modèle à un ou plusieurs modèles existants :
+         - **Autocomplétion / sélection** interactive parmi les modèles déjà présents dans le projet (détectés dynamiquement dans `models/db/`).
+         - Type de cardinalité (`belongsTo`, `hasMany`, `belongsToMany`).
+         - Nom de l'**alias** (`as`).
+         - **Clé étrangère (`foreignKey`)** : suggérer une valeur par défaut pré-définie/pré-formatée cohérente (ex: `<nom_entite>_id` ou `<nomEntite>Id`).
+         - Comportement à la suppression (**`onDelete`** : `CASCADE`, `SET NULL`, `RESTRICT`...).
+
+##### Génération des fichiers à partir de templates :
+À partir de **fichiers templates** (que vous concevrez dans un dossier dédié, par exemple `templates/`) contenant des variables de substitution (ex: `{{Entity}}`, `{{entity}}`, `{{entities}}`) :
+1. **Génération du modèle** : créer le fichier de modèle Sequelize dans `models/db/` avec ses attributs, et configurer les associations dans `models/db/index.js`.
+2. **Génération du contrôleur** : créer le contrôleur dans `controllers/` avec le code de base pour les opérations CRUD standard (`cget`, `get`, `create`, `update`, `delete`).
+3. **Génération du routeur** : créer le fichier de routes dans `routes/` reliant les méthodes HTTP aux actions correspondantes du contrôleur.
+4. **Enregistrement automatique dans `server.js`** :
+   - Le script doit lire programmatiquement le fichier `server.js` pour y injecter :
+     - L'import du nouveau routeur généré.
+     - L'enregistrement du routeur via `app.use(...)`.
+   - L'insertion doit préserver l'intégrité du code existant dans `server.js`.
+
+##### Sécurités & cas limites :
+- Si un des fichiers cibles (contrôleur, routeur) existe déjà, refuser l'opération par défaut ou demander une confirmation explicite pour éviter tout écrasement accidentel.
+- Si le routeur est déjà importé ou enregistré dans `server.js`, ne pas créer de doublons.
+- Afficher un récapitulatif clair dans le terminal listant l'ensemble des fichiers créés et modifiés.
+
+---
+
+#### Étape 2 : Intégration de la migration (`migrator.js` ➔ commande CLI)
+
+Le projet dispose actuellement d'un script `migrator.js` fonctionnant de manière procédurale en lisant directement `process.argv` (`(process.argv[2] ?? "--alter").slice(2)`).
+
+##### Travail à réaliser :
+- Convertir la logique de synchronisation de la base de données en une véritable commande du CLI (ex: `db:sync` ou `db:migrate`).
+- Utiliser le système d'options formalisé de votre bibliothèque de CLI plutôt qu'un découpage brut de tableau d'arguments :
+  - Déclarer une option ou un comportement par défaut pour la synchronisation avec `--alter` (mise à jour du schéma existant sans suppression).
+  - Déclarer une option `--force` (recréation intégrale des tables).
+- Gérer proprement le cycle de vie du processus Node.js :
+  - Fermer proprement la connexion Sequelize à la fin du traitement.
+  - En cas d'erreur : capturer l'exception, afficher un message d'erreur lisible et quitter avec un code de retour en échec (`process.exit(1)`).
+- Adapter le script npm correspondant dans `package.json` pour appeler la commande via votre CLI.
+
+---
+
+### Critères d'évaluation
+- [ ] Le CLI dispose d'un point d'entrée exécutable (déclaré dans les scripts de `package.json`).
+- [ ] Le **Design Pattern Command** est respecté : chaque commande est isolée dans un module autonome.
+- [ ] L'aide en ligne (`--help`) liste toutes les commandes disponibles, leurs descriptions et leurs options.
+- [ ] La commande `make:crud` vérifie la présence du modèle et déclenche un prompt interactif complet s'il n'existe pas (saisie des attributs, types, `allowNull`).
+- [ ] La configuration interactive des relations propose une autocomplétion / liste des modèles existants avec pré-remplissage des alias, `foreignKey` et options `onDelete`.
+- [ ] La commande `make:crud` génère des fichiers cohérents et syntaxiquement valides (modèle, contrôleur, routeur).
+- [ ] Le fichier `server.js` est automatiquement et proprement mis à jour sans duplication ni régression.
+- [ ] Les écrasements accidentels de fichiers existants sont interceptés.
+- [ ] L'ancien script `migrator.js` est refactorisé en commande CLI s'appuyant sur les options déclarées (`--alter`, `--force`).
